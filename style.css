@@ -1,0 +1,390 @@
+/* Shared styles */
+:root {
+  --bg: #f8fafc;
+  --muted: #64748b;
+  --brand: #f6c23e;
+  --accent: #111827;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Inter, system-ui, Arial, sans-serif;
+  margin: 0;
+  background: linear-gradient(180deg, var(--bg), #f1f5f9);
+  color: var(--accent);
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: white;
+  box-shadow: 0 1px 4px rgba(2, 6, 23, 0.06);
+}
+
+.brand {
+  font-weight: 700;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 20px auto;
+  padding: 0 16px;
+}
+
+.login-page {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
+}
+
+.login-card {
+  width: 360px;
+  text-align: center;
+}
+
+.login-card h1 {
+  margin: 4px 0 6px;
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+.form-row {
+  margin: 10px 0;
+  text-align: left;
+}
+
+.form-row label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.form-row input,
+.form-row select,
+.form-row textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e6e9ee;
+  border-radius: 8px;
+}
+
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus {
+  outline: 2px solid #a3b0ff;
+}
+
+.form-row.actions {
+  text-align: right;
+  margin-top: 18px;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.controls div {
+  display: flex;
+  gap: 12px;
+}
+
+.controls input,
+.controls select {
+  padding: 8px 12px;
+  border: 1px solid #e6e9ee;
+  border-radius: 8px;
+  min-width: 220px;
+}
+
+/* General button style */
+.btn {
+  background: white;
+  border: 1px solid #e6e9ee;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.btn.primary:hover {
+  background: #1e293b;
+}
+
+/* Modal styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.modal-content textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.modal-content .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.modal-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+
+/* Notices styles */
+.notices-container {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.04);
+  margin-bottom: 20px;
+}
+
+.notices-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.notices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notice-card {
+  background: #f8faff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  position: relative;
+}
+
+.notice-card .title {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.notice-card .content {
+  font-size: 0.9rem;
+  color: #333;
+  line-height: 1.4;
+}
+
+.notice-card .notice-timestamp {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.notice-card .actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+}
+
+/* New card grid styles */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.card-event {
+  background: white;
+  border-radius: 12px;
+  padding-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.card-event .card-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.card-event .card-content {
+  padding: 12px 14px 0;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.card-event .date-box {
+  flex-shrink: 0;
+  text-align: center;
+  background: var(--brand);
+  color: var(--accent);
+  padding: 6px 8px;
+  border-radius: 8px;
+  width: 50px;
+  font-weight: bold;
+}
+
+.card-event .date-box .month {
+  font-size: 0.7rem;
+}
+
+.card-event .date-box .day {
+  font-size: 1.1rem;
+}
+
+.card-event .event-info {
+  flex-grow: 1;
+}
+
+.card-event .title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+
+.card-event .location {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.card-event .meta {
+  font-size: 0.9rem;
+  color: var(--muted);
+  padding: 0 14px;
+}
+
+.card-event .desc {
+  font-size: 0.95rem;
+  color: #111827;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.card-event .tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0 14px;
+  margin-top: 10px;
+}
+
+.tag {
+  background: #fff7e6;
+  border: 1px solid #f1e6c9;
+  padding: 6px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: #8a6b00;
+}
+
+/* bottom actions */
+.card-event .bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding: 0 14px;
+}
+
+.btn {
+  background: white;
+  border: 1px solid #e6e9ee;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* New category section styles */
+.category-section {
+  background: #f8f8f8;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.category-section h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #555;
+  border-bottom: 2px solid #ccc;
+  padding-bottom: 8px;
+}

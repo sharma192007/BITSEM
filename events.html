@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Event Manager</title>
+  <style>
+    /* Shared styles */
+    :root {
+      --bg: #f8fafc;
+      --muted: #64748b;
+      --brand: #f6c23e;
+      --accent: #111827;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Inter, system-ui, Arial, sans-serif;
+      margin: 0;
+      background: linear-gradient(180deg, var(--bg), #f1f5f9);
+      color: var(--accent);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      background: white;
+      box-shadow: 0 1px 4px rgba(2, 6, 23, 0.06);
+    }
+
+    .brand {
+      font-weight: 700;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+
+    .login-page {
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
+    }
+
+    .login-card {
+      width: 360px;
+      text-align: center;
+    }
+
+    .login-card h1 {
+      margin: 4px 0 6px;
+    }
+
+    .small {
+      font-size: 0.85rem;
+    }
+
+    .form-row {
+      margin: 10px 0;
+      text-align: left;
+    }
+
+    .form-row label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .form-row input,
+    .form-row select,
+    .form-row textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #e6e9ee;
+      border-radius: 8px;
+    }
+
+    .form-row input:focus,
+    .form-row select:focus,
+    .form-row textarea:focus {
+      outline: 2px solid #a3b0ff;
+    }
+
+    .form-row.actions {
+      text-align: right;
+      margin-top: 18px;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .controls div {
+      display: flex;
+      gap: 12px;
+    }
+
+    .controls input,
+    .controls select {
+      padding: 8px 12px;
+      border: 1px solid #e6e9ee;
+      border-radius: 8px;
+      min-width: 220px;
+    }
+
+    /* General button style */
+    .btn {
+      background: white;
+      border: 1px solid #e6e9ee;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .btn.primary:hover {
+      background: #1e293b;
+    }
+
+    /* Modal styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      overflow-y: auto;
+      max-height: 90vh;
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea {
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .modal-content textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .modal-content .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .modal-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+
+    /* Notices styles */
+    .notices-container {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 6px 18px rgba(2, 6, 23, 0.04);
+      margin-bottom: 20px;
+    }
+
+    .notices-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .notices-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .notice-card {
+      background: #f8faff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      position: relative;
+    }
+
+    .notice-card .title {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .notice-card .content {
+      font-size: 0.9rem;
+      color: #333;
+      line-height: 1.4;
+    }
+
+    .notice-card .notice-timestamp {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .notice-card .actions {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      gap: 4px;
+    }
+
+    /* New card grid styles */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .card-event {
+      background: white;
+      border-radius: 12px;
+      padding-bottom: 12px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(2, 6, 23, 0.04);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-event .card-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-event .card-content {
+      padding: 12px 14px 0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .card-event .date-box {
+      flex-shrink: 0;
+      text-align: center;
+      background: var(--brand);
+      color: var(--accent);
+      padding: 6px 8px;
+      border-radius: 8px;
+      width: 50px;
+      font-weight: bold;
+    }
+
+    .card-event .date-box .month {
+      font-size: 0.7rem;
+    }
+
+    .card-event .date-box .day {
+      font-size: 1.1rem;
+    }
+    
+    .card-event .event-details {
+      flex-grow: 1;
+    }
+
+    .card-event .title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-top: 0;
+      margin-bottom: 4px;
+    }
+
+    .card-event .meta {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin: 0;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .card-event .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .card-event .description-container {
+      padding: 0 14px;
+      margin-top: 10px;
+    }
+
+    .card-event .desc {
+      font-size: 0.95rem;
+      color: #111827;
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .card-event .tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 0 14px;
+      margin-top: 10px;
+    }
+
+    .tag {
+      background: #fff7e6;
+      border: 1px solid #f1e6c9;
+      padding: 6px 8px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      color: #8a6b00;
+    }
+    
+    /* New style for time text */
+    .time-text {
+        font-weight: bold;
+        font-size: 1rem;
+        color: #333; /* A bit darker to stand out */
+    }
+
+    /* bottom actions */
+    .card-event .bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding: 0 14px;
+    }
+    
+    .link-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .link-row select, .link-row input {
+      flex-grow: 1;
+      min-width: 0;
+    }
+
+    .link-add-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      background-color: #e2e8f0;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn {
+      background: white;
+      border: 1px solid #e6e9ee;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* New category section styles */
+    .category-section {
+      background: #f8f8f8;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .category-section h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: #555;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Event Manager</div>
+    <div class="top-actions">
+      <span id="who" class="muted"></span>
+      <button id="logoutBtn" class="btn">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="controls">
+      <div>
+        <input id="search" placeholder="Search events..." />
+        <select id="sortBy"><option value="date">Sort by date</option><option value="title">Sort by title</option></select>
+      </div>
+      <div id="adminControls" style="display:none; gap: 12px;">
+        <button id="newBtn" class="btn primary">+ New Event</button>
+        <button id="manageSectionsBtn" class="btn primary">Manage Sections</button>
+      </div>
+    </section>
+    
+    <section id="notices" class="notices-container">
+      <div class="notices-header">
+        <h4>Notices</h4>
+        <div id="newNoticeBtn" style="display:none;"><button class="btn primary">+ New Notice</button></div>
+      </div>
+      <div id="noticesList" class="notices-list"></div>
+    </section>
+
+    <div id="dynamic-sections"></div>
+    
+  </main>
+
+  <div id="modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3 id="modalTitle">Create Event</h3>
+      
+      <div class="form-row">
+        <label for="m_type">Event Type</label>
+        <select id="m_type"></select>
+      </div>
+      <input id="m_title" placeholder="Title" />
+      <input type="date" id="m_date" />
+      <input id="m_time" type="time" value="12:00" />
+      <input id="m_location" placeholder="Location" />
+      <textarea id="m_desc" placeholder="Description"></textarea>
+      <input id="m_capacity" placeholder="Capacity (number)" />
+      <input id="m_tags" placeholder="Tags (comma separated)" />
+      
+      <div class="form-row">
+        <label for="m_links">Event Links</label>
+        <div id="linksContainer"></div>
+        <button id="addLinkBtn" type="button" class="btn link-add-btn" style="margin-top: 8px;">+ Add Link</button>
+      </div>
+
+      <p class="modal-label">Image (choose file or paste URL)</p>
+      <input type="file" id="m_image" accept="image/*" />
+      <input type="text" id="m_image_url" placeholder="or paste image URL here" />
+
+      <div class="modal-actions">
+        <button id="m_cancel" class="btn">Cancel</button>
+        <button id="m_save" class="btn primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="noticeModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3 id="noticeModalTitle">Create Notice</h3>
+      <input id="n_title" placeholder="Title" />
+      <textarea id="n_content" placeholder="Content"></textarea>
+      <div class="modal-actions">
+        <button id="n_cancel" class="btn">Cancel</button>
+        <button id="n_save" class="btn primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="sectionModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>Manage Event Sections</h3>
+      <div id="sectionsList" class="notices-list"></div>
+      <div style="display: flex; gap: 8px; margin-top: 12px;">
+        <input id="newSectionName" placeholder="New section name" style="flex-grow: 1;" />
+        <button id="addSectionBtn" class="btn primary">Add</button>
+      </div>
+      <div class="modal-actions">
+        <button id="s_cancel" class="btn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // app namespace for login auth
+    window.appAuth = (function(){
+      // admin credentials: username and password hash (sha-256 of password)
+      const ADMIN_USER = 'admin';
+      // SHA-256 hash of the password 'password'
+      const ADMIN_PASS_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
+
+      async function sha256(message){
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+      }
+
+      async function loginAdmin(username, password){
+        if (!username || !password) return false;
+        if (username !== ADMIN_USER) return 'username_mismatch';
+        const h = await sha256(password);
+        
+        if (h === ADMIN_PASS_HASH) {
+          return true;
+        }
+        return 'password_mismatch';
+      }
+
+      return { loginAdmin };
+    })();
+
+    // Event storage helpers
+    function getEvents(){ return JSON.parse(localStorage.getItem('events_v1')||'[]'); }
+    function saveEvents(ev){ localStorage.setItem('events_v1', JSON.stringify(ev)); }
+
+    // New utility to format date
+    function formatDate(dateString){
+      if (!dateString) return {};
+      const [year, month, day] = dateString.split('-');
+      const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+      return { month: months[parseInt(month, 10) - 1], day: parseInt(day, 10) };
+    }
+
+    // New utility to format time with AM/PM
+    function formatTime(timeString) {
+        if (!timeString) return '';
+        const [hours, minutes] = timeString.split(':');
+        let h = parseInt(hours, 10);
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12;
+        h = h ? h : 12; // The hour '0' should be '12'
+        return `${h}:${minutes} ${ampm}`;
+    }
+
+    // Utility to escape HTML and create clickable links
+    function linkify(text) {
+      const escapedText = escapeHtml(text);
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      return escapedText.replace(urlRegex, (url) => {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+      });
+    }
+
+    // New Sections storage helpers
+    function getSections() {
+      const sections = JSON.parse(localStorage.getItem('event_sections_v1') || '[]');
+      if (sections.length === 0) {
+        // Seed with defaults if no sections exist
+        return [{name: 'Forms'}, {name: 'Induction Events'}];
+      }
+      return sections;
+    }
+    function saveSections(sections) {
+      localStorage.setItem('event_sections_v1', JSON.stringify(sections));
+    }
+
+    // Renders the dynamic sections and their events
+    function renderSections() {
+      const sectionsContainer = document.getElementById('dynamic-sections');
+      sectionsContainer.innerHTML = '';
+      const sections = getSections();
+
+      sections.forEach(section => {
+        const sectionEl = document.createElement('section');
+        sectionEl.className = 'category-section';
+        sectionEl.id = `section-${section.name.toLowerCase().replace(/\s/g, '-')}`;
+
+        sectionEl.innerHTML = `
+          <h2>${escapeHtml(section.name)}</h2>
+          <div id="${sectionEl.id}-grid" class="grid"></div>
+        `;
+        sectionsContainer.appendChild(sectionEl);
+      });
+
+      renderEvents(localStorage.getItem('role') || 'user');
+    }
+
+    // render events for a given role
+    function renderEvents(role){
+      const sections = getSections();
+      const q = (document.getElementById('search') && document.getElementById('search').value.toLowerCase())||'';
+      let events = getEvents();
+
+      // sort
+      const sortBy = (document.getElementById('sortBy') && document.getElementById('sortBy').value) || 'date';
+      if(sortBy==='date') events.sort((a,b)=> (a.date||'').localeCompare(b.date||'') || (a.time||'').localeCompare(b.time||''));
+      else events.sort((a,b)=> (a.title||'').localeCompare(b.title||''));
+
+      if(q) events = events.filter(e => (e.title||'').toLowerCase().includes(q) || (e.desc||'').toLowerCase().includes(q) );
+
+      // Clear all dynamic grids
+      sections.forEach(section => {
+        const grid = document.getElementById(`section-${section.name.toLowerCase().replace(/\s/g, '-')}-grid`);
+        if (grid) grid.innerHTML = '';
+      });
+
+      // Render events into their respective grids
+      sections.forEach(section => {
+        const grid = document.getElementById(`section-${section.name.toLowerCase().replace(/\s/g, '-')}-grid`);
+        const sectionEvents = events.filter(e => e.type === section.name);
+        
+        sectionEvents.forEach((ev, idx) => {
+          const card = document.createElement('div');
+          card.className = 'card-event';
+
+          const { month, day } = formatDate(ev.date);
+          const tags = (ev.tags||[]).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+          
+          const imageSrc = ev.image && ev.image.length > 0 ? ev.image : `https://picsum.photos/400/200?random=${Math.floor(Math.random() * 1000)}`;
+
+          let linksHtml = '';
+          if (ev.links && ev.links.length > 0) {
+            linksHtml = `
+              <div class="bottom flex flex-col items-start space-y-2">
+                ${ev.links.map(link => `
+                  <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="btn primary">
+                    ${link.type === 'google_form' ? 'Google Form' : 'External Link'}
+                  </a>
+                `).join('')}
+              </div>
+            `;
+          }
+
+          card.innerHTML = `
+            <img src="${imageSrc}" onerror="this.src='https://placehold.co/400x200?text=Image+Not+Found'" alt="Event image" class="card-image">
+            <div class="card-content">
+              <div class="date-box">
+                <div class="month">${escapeHtml(month)}</div>
+                <div class="day">${escapeHtml(String(day))}</div>
+              </div>
+              <div class="event-details">
+                <h4 class="title">${escapeHtml(ev.title||'Untitled')}</h4>
+                <p class="meta">
+                  <span class="meta-item">🕒 <span class="time-text">${escapeHtml(formatTime(ev.time||''))}</span></span>
+                  ${ev.location ? `<span class="meta-item">📍 ${escapeHtml(ev.location)}</span>` : ''}
+                </p>
+              </div>
+            </div>
+            <div class="description-container">
+                <p class="desc">${linkify(ev.desc||'')}</p>
+            </div>
+            ${linksHtml}
+            <div class="tags">${tags}</div>
+            <div class="bottom">
+              <div class="actions-area"></div>
+            </div>
+          `;
+          const actionsArea = card.querySelector('.actions-area');
+          if(role === 'user'){
+            const btn = document.createElement('button');
+            btn.className = 'btn small';
+            btn.textContent = ev.attendees && ev.attendees.includes(localStorage.getItem('user')) ? 'Cancel RSVP' : 'RSVP';
+            btn.onclick = () => { toggleRsvp(events.findIndex(e => e.title === ev.title)); renderEvents(role); };
+            actionsArea.appendChild(btn);
+          } else if(role === 'admin'){
+            const edit = document.createElement('button');
+            edit.className = 'btn small';
+            edit.textContent = 'Edit';
+            edit.onclick = () => { openModal(ev, events.findIndex(e => e.title === ev.title)); };
+            const del = document.createElement('button');
+            del.className = 'btn small';
+            del.textContent = 'Delete';
+            del.onclick = () => { if(confirm('Delete event?')) deleteEvent(events.findIndex(e => e.title === ev.title)); };
+            actionsArea.appendChild(edit);
+            actionsArea.appendChild(del);
+          }
+          grid.appendChild(card);
+        });
+      });
+    }
+
+    // utility escape
+    function escapeHtml(s){ return String(s).replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'})[c]); }
+
+    // admin functions
+    function openModal(ev, idx){
+      document.getElementById('modal').style.display = 'flex';
+      document.getElementById('modalTitle').textContent = ev ? 'Edit Event' : 'Create Event';
+      
+      const typeSelect = document.getElementById('m_type');
+      typeSelect.innerHTML = ''; // Clear old options
+      const sections = getSections();
+      sections.forEach(section => {
+        const option = document.createElement('option');
+        option.value = section.name;
+        option.textContent = section.name;
+        typeSelect.appendChild(option);
+      });
+      document.getElementById('m_type').value = ev ? ev.type : (sections[0] ? sections[0].name : '');
+      document.getElementById('m_title').value = ev ? ev.title : '';
+      document.getElementById('m_date').value = ev ? ev.date : new Date().toISOString().slice(0,10);
+      document.getElementById('m_time').value = ev ? ev.time : '12:00';
+      document.getElementById('m_location').value = ev ? ev.location : '';
+      document.getElementById('m_desc').value = ev ? ev.desc : '';
+      document.getElementById('m_capacity').value = ev ? (ev.capacity||'') : '';
+      document.getElementById('m_tags').value = ev ? (ev.tags||[]).join(', ') : '';
+      
+      const linksContainer = document.getElementById('linksContainer');
+      linksContainer.innerHTML = '';
+      const existingLinks = ev ? ev.links : [];
+      if (existingLinks.length > 0) {
+        existingLinks.forEach(link => addLinkField(link.type, link.url));
+      } else {
+        addLinkField(); // Add one empty link field for a new event
+      }
+
+      // Set image URL or clear input
+      document.getElementById('m_image_url').value = ev && ev.image && !ev.image.startsWith('data:image') ? ev.image : '';
+      // Clear file input on new event
+      document.getElementById('m_image').value = '';
+      // save handler
+      const saveBtn = document.getElementById('m_save');
+      saveBtn.onclick = function(){ saveModal(idx); };
+    }
+
+    function closeModal(){ document.getElementById('modal').style.display = 'none'; }
+
+    // saveModal is now asynchronous to handle file reading
+    async function saveModal(idx){
+      const events = getEvents();
+      const imageUrlInput = document.getElementById('m_image_url').value.trim();
+      const imageFile = document.getElementById('m_image').files[0];
+      let imageData = null;
+
+      if (imageUrlInput) {
+        imageData = imageUrlInput;
+      } else if (imageFile) {
+        const reader = new FileReader();
+        imageData = await new Promise((resolve) => {
+          reader.onload = (e) => resolve(e.target.result);
+          reader.readAsDataURL(imageFile);
+        });
+      }
+      
+      const links = [];
+      document.querySelectorAll('#linksContainer .link-row').forEach(row => {
+        const type = row.querySelector('.link-type').value;
+        const url = row.querySelector('.link-url').value.trim();
+        if (url) {
+          links.push({ type, url });
+        }
+      });
+
+
+      const payload = {
+        type: document.getElementById('m_type').value,
+        title: document.getElementById('m_title').value.trim(),
+        date: document.getElementById('m_date').value,
+        time: document.getElementById('m_time').value,
+        location: document.getElementById('m_location').value.trim(),
+        desc: document.getElementById('m_desc').value.trim(),
+        capacity: document.getElementById('m_capacity').value.trim() ? Number(document.getElementById('m_capacity').value) : null,
+        tags: document.getElementById('m_tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+        links: links,
+        image: imageData || (idx != null && events[idx] ? events[idx].image : null),
+        attendees: (idx!=null && events[idx]) ? events[idx].attendees || [] : []
+      };
+      if(idx!=null){
+        events[idx] = payload;
+      } else {
+        events.push(payload);
+      }
+      saveEvents(events);
+      closeModal();
+      const role = localStorage.getItem('role') || 'user';
+      renderEvents(role);
+    }
+
+    // delete
+    function deleteEvent(idx){
+      const events = getEvents();
+      events.splice(idx,1);
+      saveEvents(events);
+      renderEvents(localStorage.getItem('role')||'user');
+    }
+
+    // RSVP
+    function toggleRsvp(idx){
+      const events = getEvents();
+      const user = localStorage.getItem('user') || 'Guest';
+      events[idx].attendees = events[idx].attendees || [];
+      const found = events[idx].attendees.indexOf(user);
+      if(found>=0) events[idx].attendees.splice(found,1);
+      else events[idx].attendees.push(user);
+      saveEvents(events);
+    }
+
+    // New Notice storage helpers
+    function getNotices(){ return JSON.parse(localStorage.getItem('notices_v1')||'[]'); }
+    function saveNotices(notices){ localStorage.setItem('notices_v1', JSON.stringify(notices)); }
+
+    // New function to format notice timestamp
+    function formatNoticeDate(timestamp){
+      if (!timestamp) return '';
+      const date = new Date(timestamp);
+      const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+      const month = months[date.getMonth()];
+      const day = date.getDate();
+      const hours = date.getHours();
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const formattedTime = `${hours % 12 === 0 ? 12 : hours % 12}:${minutes} ${ampm}`;
+      return `${month} ${day} at ${formattedTime}`;
+    }
+
+
+    // New function to render notices
+    function renderNotices(role){
+      const list = document.getElementById('noticesList');
+      if(!list) return;
+      const notices = getNotices();
+      list.innerHTML = '';
+      notices.forEach((n, idx) => {
+        const notice = document.createElement('div');
+        notice.className = 'notice-card';
+        notice.innerHTML = `
+          <div class="title">${escapeHtml(n.title)}</div>
+          <div class="content">${escapeHtml(n.content)}</div>
+          <div class="notice-timestamp">${formatNoticeDate(n.timestamp)}</div>
+        `;
+        if (role === 'admin') {
+          const actions = document.createElement('div');
+          actions.className = 'actions';
+          const editBtn = document.createElement('button');
+          editBtn.className = 'btn small';
+          editBtn.textContent = 'Edit';
+          editBtn.onclick = () => openNoticeModal(n, idx);
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'btn small';
+          deleteBtn.textContent = 'Delete';
+          deleteBtn.onclick = () => { if(confirm('Delete notice?')) deleteNotice(idx); };
+          actions.appendChild(editBtn);
+          actions.appendChild(deleteBtn);
+          notice.appendChild(actions);
+        }
+        list.appendChild(notice);
+      });
+    }
+
+    // New admin functions for notices
+    function openNoticeModal(notice, idx){
+      document.getElementById('noticeModal').style.display = 'flex';
+      document.getElementById('noticeModalTitle').textContent = notice ? 'Edit Notice' : 'Create Notice';
+      document.getElementById('n_title').value = notice ? notice.title : '';
+      document.getElementById('n_content').value = notice ? notice.content : '';
+      const saveBtn = document.getElementById('n_save');
+      saveBtn.onclick = function(){ saveNotice(idx); };
+    }
+
+    function closeNoticeModal(){ document.getElementById('noticeModal').style.display = 'none'; }
+
+    function saveNotice(idx){
+      const notices = getNotices();
+      const payload = {
+        title: document.getElementById('n_title').value.trim(),
+        content: document.getElementById('n_content').value.trim(),
+        timestamp: new Date().toISOString()
+      };
+      if(idx != null){
+        notices[idx] = payload;
+      } else {
+        notices.unshift(payload);
+      }
+      saveNotices(notices);
+      closeNoticeModal();
+      renderNotices(localStorage.getItem('role') || 'user');
+    }
+
+    function deleteNotice(idx){
+      const notices = getNotices();
+      notices.splice(idx,1);
+      saveNotices(notices);
+      renderNotices(localStorage.getItem('role') || 'user');
+    }
+
+    // Section management functions
+    function openSectionModal() {
+      document.getElementById('sectionModal').style.display = 'flex';
+      renderSectionList();
+    }
+
+    function closeSectionModal() {
+      document.getElementById('sectionModal').style.display = 'none';
+      renderSections();
+    }
+
+    function renderSectionList() {
+      const list = document.getElementById('sectionsList');
+      list.innerHTML = '';
+      const sections = getSections();
+      sections.forEach((section, idx) => {
+        const item = document.createElement('div');
+        item.className = 'notice-card';
+        item.innerHTML = `
+          <div class="title">${escapeHtml(section.name)}</div>
+          <div class="actions">
+            <button class="btn small" onclick="deleteSection(${idx})">Delete</button>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function addSection() {
+      const newName = document.getElementById('newSectionName').value.trim();
+      if (!newName) return;
+      const sections = getSections();
+      if (sections.some(s => s.name === newName)) {
+        alert('Section name already exists!');
+        return;
+      }
+      sections.push({ name: newName });
+      saveSections(sections);
+      document.getElementById('newSectionName').value = '';
+      renderSectionList();
+    }
+
+    function deleteSection(idx) {
+      if (!confirm('Are you sure you want to delete this section? All events in this section will become uncategorized.')) return;
+      const sections = getSections();
+      const sectionToDelete = sections[idx];
+      sections.splice(idx, 1);
+      saveSections(sections);
+      
+      // Update events that belong to the deleted section
+      const events = getEvents();
+      events.forEach(event => {
+        if (event.type === sectionToDelete.name) {
+          event.type = null; // or you could re-categorize them to a default
+        }
+      });
+      saveEvents(events);
+      
+      renderSectionList();
+    }
+  
+    // --- NEW: Dynamic link management functions ---
+    function addLinkField(type = 'external', url = '') {
+      const linksContainer = document.getElementById('linksContainer');
+      const linkDiv = document.createElement('div');
+      linkDiv.className = 'link-row';
+      linkDiv.innerHTML = `
+        <select class="link-type">
+          <option value="external" ${type === 'external' ? 'selected' : ''}>External Link</option>
+          <option value="google_form" ${type === 'google_form' ? 'selected' : ''}>Google Form</option>
+        </select>
+        <input type="url" class="link-url" value="${escapeHtml(url)}" placeholder="https://example.com" />
+        <button type="button" class="btn small" onclick="this.parentNode.remove()">-</button>
+      `;
+      linksContainer.appendChild(linkDiv);
+    }
+    
+    // wire modal cancel & search & sorting
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const modalCancel = document.getElementById('m_cancel');
+      modalCancel && (modalCancel.onclick = closeModal);
+      const addLinkBtn = document.getElementById('addLinkBtn');
+      addLinkBtn && (addLinkBtn.onclick = () => addLinkField());
+      
+      const search = document.getElementById('search');
+      if(search){ search.addEventListener('input', ()=> renderEvents(localStorage.getItem('role')||'user')); }
+      const sort = document.getElementById('sortBy');
+      if(sort){ sort.addEventListener('change', ()=> renderEvents(localStorage.getItem('role')||'user')); }
+      
+      // New modal handlers
+      const noticeModalCancel = document.getElementById('n_cancel');
+      if (noticeModalCancel) {
+        noticeModalCancel.onclick = closeNoticeModal;
+      }
+      const sectionModalCancel = document.getElementById('s_cancel');
+      if (sectionModalCancel) {
+        sectionModalCancel.onclick = closeSectionModal;
+      }
+      const addSectionBtn = document.getElementById('addSectionBtn');
+      if (addSectionBtn) {
+        addSectionBtn.onclick = addSection;
+      }
+
+      // seed sample event if none
+      if(getEvents().length===0){
+        saveEvents([
+          {
+            type: 'Forms',
+            title:'Summer Internship Form',
+            date:new Date().toISOString().slice(0,10),
+            time:'09:00',
+            location:'Online',
+            desc:'Fill out the summer internship application form. Submissions close on May 15th.',
+            capacity:null,
+            tags:['form','application'],
+            links: [{type: 'google_form', url:'https://forms.google.com/d/e/1FAIpQLSc7z8Y-1Q4b9l_7pD_Q7sC-5gC_5f5v2uC3y3u8y1f0u8y1f0u8y1f0u8y1f0u8y1f0u8y1f0u8y1f0u8y1f0u8y1f0u8y1f0u8y1f0u'}],
+            attendees:[]
+          },
+          {
+            type: 'Induction Events',
+            title:'Campus Coding Marathon',
+            date:new Date().toISOString().slice(0,10),
+            time:'10:00',
+            location:'Auditorium A',
+            desc:'24-hour hackathon with mini-challenges and prizes.',
+            capacity:200,
+            tags:['hackathon','coding'],
+            links: [{type: 'external', url: 'https://github.com/'}],
+            attendees:[]
+          }
+        ]);
+      }
+
+      // Seed with a sample notice if none exists
+      if(getNotices().length === 0){
+        saveNotices([{
+          title:'Welcome!',
+          content:'This is the first official notice. More updates will be posted here.',
+          timestamp: new Date().toISOString()
+        }]);
+      }
+      
+      (function initPage(){
+        const role = localStorage.getItem('role');
+        const user = localStorage.getItem('user') || 'Guest';
+        if (!role) { location.href='index.html'; return; }
+        document.getElementById('who').textContent = user + ' ('+role+')';
+        if (role === 'admin') {
+          document.getElementById('adminControls').style.display = 'flex';
+          document.getElementById('newNoticeBtn').style.display = 'block';
+        }
+        document.getElementById('logoutBtn').addEventListener('click', ()=>{ localStorage.removeItem('role'); localStorage.removeItem('user'); location.href='index.html'; });
+        
+        renderSections();
+        renderNotices(role);
+        
+        // wire new button -> admin access prompt already handled by login; admin can open modal directly
+        document.getElementById('newBtn').addEventListener('click', () => { openModal(); });
+        // New notice button
+        document.getElementById('newNoticeBtn').addEventListener('click', ()=> { openNoticeModal(); });
+        // Manage sections button
+        document.getElementById('manageSectionsBtn').addEventListener('click', () => { openSectionModal(); });
+
+        // wire all modals to close if clicked outside of content area
+        document.getElementById('modal').addEventListener('click', e => { if (e.target.id==='modal') closeModal(); });
+        document.getElementById('noticeModal').addEventListener('click', e => { if (e.target.id==='noticeModal') closeNoticeModal(); });
+        document.getElementById('sectionModal').addEventListener('click', e => { if (e.target.id==='sectionModal') closeSectionModal(); });
+
+        // also wire form submit to save the event (in case of enter key)
+        document.querySelector('#modal .modal-content').addEventListener('submit', e => {
+          e.preventDefault();
+          document.getElementById('m_save').click();
+        });
+        document.querySelector('#noticeModal .modal-content').addEventListener('submit', e => {
+          e.preventDefault();
+          document.getElementById('n_save').click();
+        });
+      })();
+    });
+  </script>
+</body>
+</html>

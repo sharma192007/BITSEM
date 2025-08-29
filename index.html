@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Event Manager - Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="login-page">
+    <div class="card login-card">
+      <h1>Event Manager</h1>
+      <p class="muted">Login as Admin or continue as User.</p>
+
+      <form id="loginForm" class="login-form">
+        <div class="form-row">
+          <label for="roleSelect">Role</label>
+          <select id="roleSelect">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <!-- Admin-specific fields, hidden by default -->
+        <div id="adminFields" style="display:none;">
+          <div class="form-row">
+            <label for="username">Username</label>
+            <input id="username" type="text" placeholder="admin">
+          </div>
+          <div class="form-row">
+            <label for="password">Password</label>
+            <input id="password" type="password" placeholder="enter password">
+          </div>
+        </div>
+
+        <!-- Display name for user role, and disabled for admin -->
+        <div class="form-row">
+          <label for="displayName">Display name</label>
+          <input id="displayName" type="text" placeholder="Guest (optional)">
+        </div>
+        
+        <!-- Message area for login feedback -->
+        <p id="loginMsg" class="small muted"></p>
+
+        <div class="form-row actions">
+          <button type="submit" class="btn primary">Continue</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- External script file containing core functions -->
+  <script src="script.js"></script>
+  <script>
+    // Get references to HTML elements
+    const roleSelect = document.getElementById('roleSelect');
+    const adminFields = document.getElementById('adminFields');
+    const displayNameInput = document.getElementById('displayName');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginMsg = document.getElementById('loginMsg');
+
+    // Event listener to toggle admin fields based on role selection
+    roleSelect.addEventListener('change', () => {
+      const selectedRole = roleSelect.value;
+      if (selectedRole === 'admin') {
+        adminFields.style.display = 'block';
+        usernameInput.setAttribute('required', '');
+        passwordInput.setAttribute('required', '');
+        displayNameInput.disabled = true; // Disable user display name for admin
+        displayNameInput.value = ''; // Clear the input
+      } else {
+        adminFields.style.display = 'none';
+        usernameInput.removeAttribute('required');
+        passwordInput.removeAttribute('required');
+        usernameInput.value = ''; // Clear admin fields
+        passwordInput.value = '';
+        displayNameInput.disabled = false; // Enable user display name for user
+      }
+    });
+
+    // Event listener for form submission
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault(); // Prevent default form submission
+      
+      const role = roleSelect.value;
+      loginMsg.textContent = ''; // Clear previous messages
+
+      if (role === 'admin') {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim(); // Added .trim() here
+        let result = false;
+        
+        // Safely call the loginAdmin function
+        if (window.appAuth) {
+          result = await window.appAuth.loginAdmin(username, password);
+        }
+
+        // Check the result to provide specific feedback
+        if (result === true) {
+          localStorage.setItem('role', 'admin');
+          localStorage.setItem('user', username);
+          window.location.href = 'events.html';
+        } else if (result === 'password_mismatch') {
+          loginMsg.textContent = 'Incorrect password.';
+        } else if (result === 'username_mismatch') {
+          loginMsg.textContent = 'Incorrect username.';
+        } else {
+          loginMsg.textContent = 'An unexpected error occurred.';
+        }
+      } else {
+        const displayName = displayNameInput.value || 'Guest';
+        localStorage.setItem('role', 'user');
+        localStorage.setItem('user', displayName);
+        window.location.href = 'events.html';
+      }
+    });
+  </script>
+</body>
+</html>
